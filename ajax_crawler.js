@@ -1,6 +1,7 @@
 import {liked_pagename, my_pagename} from "./sender_info_crawler.js";
 
 function classify_group_features(list, title){
+	var x = 123456;
     if(title.search('게시물') != -1 && title.search('올렸습니다') != -1){ //post
         list["Activity"].push('Post');
         list["Activity"].push('Text');
