@@ -8,20 +8,18 @@ notification = {
     "TimeInterval" : number(1~5), 
     "IsRead" : boolean, 
     "Sender" : string(user, group, page, system),
+    "SenderName" : string array
     "Relationship" : [], e.g., ["close", 15], ["Joined", "Closed"]
     "Acitivity" : string, 
     "Media" : [string, number],
-    "Share" : number, 
-    "Comment" : number, 
     "Likes" : number, 
 }
 */
 
 function getNotiMetadata(list, li){  //get the metadata of a notification
     //1. read / unread
-    var noti_status = $(li).find('ul._55mc').find('div._55m9').attr('aria-label');
-    if(noti_status == '읽은 상태로 표시') list["IsRead"] = false;
-    else list["IsRead"] = true;
+    var unread = JSON.parse($(li).attr("data-gt"))["unread"];
+    list["IsRead"] = (unread == 2)? false : true;
 
     //2. arrival time
     var noti_arrivalTime = $(li).find('div._42ef').find('abbr').attr('data-utime');
@@ -36,84 +34,33 @@ function getNotiMetadata(list, li){  //get the metadata of a notification
     return list;
 };
 
-function getGroupInfo(list, li){
-    //get group factors (public / closed)
-    var content = $(li).find('a').eq(0);
-    $.ajax(content.attr('href'))
-        .done(function(text){
-            var re = /([가-힣]*) 그룹/g;
-            var res = re.exec(text)[1];
-            if(res == '비공개' || res == '비밀') list['Relationship'].push('Closed');
-            else list['Relationship'].push('Public');
-        })
-    return list;
-}
-
-var ordinary_groupname = JSON.parse(localStorage['ordinary_groupname']);
-var favorite_groupname = JSON.parse(localStorage['favorite_groupname']);
-function getGroupRelationship(list, li){
+function getSenderName(list){
     var title = list['Title'];
-    list["Relationship"] = [];
-    var IsJoined = false;
-    ordinary_groupname.forEach(function(group){
-        if(title.search(group) != -1){
-            IsJoined = true;
-            list["Relationship"].push("Joined");
+    if(list['Sender'] == 'User'){
+        var re = /(.*)(님의|님이|님 외)/;
+        var res = re.exec(title)[1];
+        res = res.replace('오늘은 ','').split('님과');
+        if(typeof(res) != "object" && res.search('님이') != -1){
+            re = /(.*)(님이)/;
+            res = re.exec(res)[1];
         }
-    });
-    if(!IsJoined) list["Relationship"].push("Others");
-    else{
-        favorite_groupname.forEach(function(group){
-            if(title.search(group) != -1) list["Relationship"].push("Favorite");
-        });    
     }
-    list = getGroupInfo(list, li);
-    return list;
+    else if(list['Sender'] == 'Group'){
+        var re = /(명이|님이) (.*) 그룹/;
+        var res = re.exec(title)[2];
+        res = res.replace(/[가-힣]요일에 /, '');
+    }
+    else if(list['Sender'] == 'Page'){
+        var re = /(이|록) (.*)에 /;
+        var res = re.exec(title)[2];
+    }
+    if(res.length == 1) res = res[0];
+    list['SenderName'] = res;
+    return list;  
 }
 
-var friendRelationship = JSON.parse(localStorage['friends']); // {fr1, fr2, fr3...}, fr = {"name" : string, "relationship" : string, "mutual_friend_cnt" : number}
-function getUserRelationship(list){
-    var title = list['Title'];
-    //User가 여러명일 때는 1. close_friend 2. mutual_friends가 가장 많은 친구를 대표 relationship으로 설정. 
-    list["Relationship"] = [];
-    var FriendsList = [];
-    var IsFriend = false;
-    friendRelationship.forEach(function(friend){
-        if(title.search(friend["name"]) != -1){
-            IsFriend = true;
-            FriendsList.push(friend);
-        }
-    });
 
-    if(IsFriend){ //in case of friends
-        var IsClose = false;
-        var Closemax = 0, Generalmax = 0;
-        FriendsList.forEach(function(friend){
-            if(friend["Relationship"] == "친한 친구"){
-                IsClose = true;
-                if(Closemax < friend["mutual_friend_cnt"]) Closemax = friend["mutual_friend_cnt"];
-            }
-            else{
-                if(Generalmax < friend["mutual_friend_cnt"]) Generalmax = friend["mutual_friend_cnt"];
-            }
-        })
-        if(IsClose){ //in case of close friends
-            list["Relationship"].push("CloseFriend");
-            list["Relationship"].push(Closemax);
-        }
-        else{ //in case of general friends
-            list["Relationship"].push("Friend");
-            list["Relationship"].push(Generalmax);
-        }
-    }
-    else{ // in case of other users
-        list["Relationship"].push("Others");    
-    }
-
-    return list;
-}
-
-function getMedia(list, li){
+function getMedia(list, li, IsGroupActivity){
     var title = list["Title"];
     list["Media"] = [];
     if(title.search('사진') != -1){
@@ -129,77 +76,68 @@ function getMedia(list, li){
     }
     else{
         list["Media"].push('Text'); //text, link
-        //text 길이 추가!!
+        //text 길이 추가
+        var text_length = 0;
         var content = $(li).find('a').eq(0);
-        $.ajax(content.attr('href'))
+        if(!IsGroupActivity){
+            $.ajax(content.attr('href'))
+                .done(function(text){
+                    var re = /(<div class="hidden_elem">)([\s\S]*?)( -->)/;
+                    var res = re.exec(text)[2].split("<!-- ")[1];
+                    var d = document.createElement('div');
+                    d.innerHTML = res;
+                    var text = $(d.firstChild).find('div._5pbx.userContent').find('p');
+                    console.log(text + " " + typeof(text));
+                    text.each(function(idx){
+                        text_length += text[idx].innerHTML.length;
+                    });
+            });
+        }
+        else{
+            /*
+            $.ajax(content.attr('href'))
             .done(function(text){
+                var re = /(<div class="hidden_elem">)([\s\S]*?)( -->)/;
                 
-
-        });
-        
+            });
+            */
+        }
+        list["Media"].push(text_length);
     }
     return list;
 }
 
-function getSCL(list, li){
+function getSCL(list, li, IsGroupActivity){ //(IsGroupActivity = true) -> 게시물이 하나만 뜨는것이 아니라서 다르게 접근해야함
     var content = $(li).find('a').eq(0);
     $.ajax(content.attr('href'))
         .done(function(text){
-            var like_re = /((,|\d)*)명/; //get the number of likes
-            var like_res = like_re.exec(text);
-            var like_cnt;
-            if(like_res == null) like_cnt = 0; 
-            else like_cnt = +like_res[1].replace(/,/g,'');
-            list["Like"] = like_cnt; 
-            
-            var comment_re = /댓글 ((,|\d)*)개/; //can not use ajax
-            var comment_res = comment_re.exec(text);
-            var comment_cnt;
-            if(comment_res == null) comment_cnt = 0;
-            else comment_cnt = +comment_res[1].replace(/,/g,'');
-            list["Comment"] = comment_cnt;
+            if(!IsGroupActivity){
+                var like_re = /((,|\d)*)명/; //get the number of likes
+                var like_res = like_re.exec(text);
+                var like_cnt;
+                if(like_res == null) like_cnt = 0; 
+                else like_cnt = +like_res[1].replace(/,/g,'');
+                list["Like"] = like_cnt; 
+            }
+            else{ //group에 올라온 게시물인 경우
 
-            var share_re = /공유 ((,|\d)*)회/; //can not use ajax
-            var share_res = share_re.exec(text);
-            var share_cnt;
-            if(share_res == null) share_cnt = 0;
-            else share_cnt = +share_res[1].replace(/,/g,'');
-            list["Share"] = share_cnt;
+
+            }
         })
     return list;
 }
 
 function getContentInfo(list, li, IsGroupActivity){
     var title = list['Title'];
-    list = getMedia(list, li);
-    //list = getSCL(list, li, IsGroupActivity); //(Share, Comment, Likes)
+    list = getMedia(list, li, IsGroupActivity);
+    list = getSCL(list, li, IsGroupActivity); //(Share, Comment, Likes)
     return list;
 };
 
 function classifyUserActivities(list, li, IsGroupActivity){
     var title = list['Title'];
-    if((title.search('게시물') != -1 && title.search('올렸습니다') != -1) || title.search('추가') != -1 || title.search('게시') != -1 || title.search('에 있습니다') != -1){ //post text
-        list["Activity"] = 'Post';
-        list = getContentInfo(list, li, IsGroupActivity);
-    }
-    else if((title.search('상태') != -1 && title.search('업데이트') != -1) || (title.search('업데이트') != -1 && title.search('게시') != -1)){ //status
-        list["Activity"] = 'Status';
-        list = getContentInfo(list, li, IsGroupActivity);
-    }
-    else if(title.search('좋아합니다') != -1 || title.search('공감했습니다') != -1){ //like
-        list["Activity"] = 'Like';
-        list = getContentInfo(list, li, IsGroupActivity);
-    }
-    else if(title.search('댓글을 남겼습니다') != -1 || title.search('답글을 남겼습니다') != -1){ //Comment
-        list["Activity"] = 'Comment';
-        list = getContentInfo(list, li, IsGroupActivity);
-    }
-    else if(title.search('언급했습니다') != -1 || title.search('태그했습니다') != -1){ //tag
+    if(title.search('언급했습니다') != -1 || title.search('태그했습니다') != -1){ //tag
         list["Activity"] = 'Tag';
-        list = getContentInfo(list, li, IsGroupActivity);
-    }
-    else if(title.search('공유') != -1){ //share
-        list["Activity"] = 'Share';
         list = getContentInfo(list, li, IsGroupActivity);
     }
     else if(title.search('생일') != -1){ //birthday
@@ -216,6 +154,31 @@ function classifyUserActivities(list, li, IsGroupActivity){
     }
     else if(title.search('이벤트') != -1 && title.search('응답') != -1){ //join the event
         list["Activity"] = 'JoinEvent';
+    }
+    else if(title.search('댓글을 남겼습니다') != -1 || title.search('답글을 남겼습니다') != -1){ //Comment
+        list["Activity"] = 'Comment';
+    }
+    else if(title.search('추억을 공유') != -1){
+        list["Activity"] = 'OnThisDay';
+    }
+    else if(title.search('공유') != -1){ //share
+        list["Activity"] = 'Share';
+        list = getContentInfo(list, li, IsGroupActivity);
+    }
+    else if((title.search('상태') != -1 && title.search('업데이트') != -1) || (title.search('업데이트') != -1 && title.search('게시') != -1)){ //status
+        list["Activity"] = 'Status';
+        list = getContentInfo(list, li, IsGroupActivity);
+    }
+    else if(title.search('좋아합니다') != -1 || title.search('공감했습니다') != -1){ //like
+        list["Activity"] = 'Like';
+        list = getContentInfo(list, li, IsGroupActivity);
+    }
+    else if(title.search('올렸습니다') != -1 || title.search('추가') != -1 || title.search('게시') != -1 || title.search('에 있습니다') != -1){ //post text
+        list["Activity"] = 'Post';
+        list = getContentInfo(list, li, IsGroupActivity);
+    }
+    else if(title.search('커버 사진') != -1 || title.search('프로필 사진') != -1){
+        list["Activity"] = 'AddorChangeProfile';
     }
     return list;
 };
@@ -238,11 +201,27 @@ function classifyGroupActivities(list, li){
     return list;
 };
 
-function classifyPageAcitivites(list){
+function classifyPageAcitivites(list, li){
     var title = list['Title'];
     if(title.search('새 이벤트') != -1 && title.search('추가') != -1){ //add an event 
-        list["Activity"].push('AddEvent');
+        list['Sender'] = 'LikedPage';
+        list["Activity"] = 'AddEvent';
     }
+    else if((title.search('알 수 있도록') != -1 && title.search('좋아요를 요청') != -1) || 
+    (title.search('늘릴 수 있도록') != -1 && title.search('추가하세요') != -1)){ //recommended action for my pages 
+        list['Sender'] = 'MyPage';
+        list["Activity"] = 'RecommendationforMypage';
+    }
+    else if(title.search('페이지') != -1 && title.search('활동') != -1){ //notify the current my page status 
+        list['Sender'] = 'MyPage';
+        list["Activity"] = 'NotifystatusofMypage';
+    }
+    else if(title.search('추가') != -1){ //post 
+        list['Sender'] = 'LikedPage';
+        list["Activity"] = 'Post';
+        list = getContentInfo(list, li, false);
+    }
+
     return list;
 }
 
@@ -250,83 +229,86 @@ function classifySystemAcitivies(list){
     var title = list['Title'];
     
     if(title.search('친구 추천') != -1){ //recommendation friends 
-        list["Activity"].push('RecommendFriend');
+        list["Activity"] = 'RecommendFriend';
     }
     else if(title.search('동영상') != -1 && title.search('확인') != -1){ // recommendation video
-        list["Activity"].push('RecommendVideo');
+        list["Activity"] = 'RecommendVideo';
     }
     else if(title.search('지역 페이지') != -1 && title.search('새로운 소식') != -1){ //recommendation local pages
-        list["Activity"].push('RecommendLocalpage');
+        list["Activity"] = 'RecommendLocalpage';
     }
-    else if((title.search('알 수 있도록') != -1 && title.search('좋아요를 요청') != -1) || 
-    (title.search('늘릴 수 있도록') != -1 && title.search('추가하세요') != -1)){ //recommended action for my pages 
-        list["Activity"].push('RecommendationforMypage');
-    }
-    else if(title.search('페이지') != -1 && title.search('활동') != -1){ //notify the current page status 
-        list["Activity"].push('NotifystatusofMypage');
-    }
+    return list;
 }
 
 var lis = document.querySelectorAll('ul > li._33c');
-
 var notifications = [];
 var noti_num = 0;
-var liked_pagename = JSON.parse(localStorage['liked_pagename']);
-var my_pagename = JSON.parse(localStorage['my_pagename']);
 
 
 lis.forEach(function(li){
     var noti_title = $(li).find('div._4l_v').find('span').eq(0).text();
     var notification = {};
     notification["Title"] = noti_title;
-
+    console.log(noti_title);
     //notification metadata
     notification = getNotiMetadata(notification, li);
-
-    //notification activity and content lassification
+    //notification activity and content classification
+    var relationship = JSON.parse($(lis).attr('data-gt'))["notif_type"];
     if(noti_title.search('그룹') != -1){ //Group
         notification['Sender'] = 'Group';
+        notification = getSenderName(notification);
         notification = classifyGroupActivities(notification, li);
-        //notification = getGroupRelationship(notification, li);
     }
-    else if(noti_title.search('님이') != -1 || (noti_title.search('님 외') != -1 && noti_title.search('명이') != -1) || noti_title.search('생일') != -1){ //User
+    else if((noti_title.search('님 외') != -1 && noti_title.search('명이') != -1) || noti_title.search('생일') != -1){ //User
         notification['Sender'] = 'User';
-        //notification = classifyUserActivities(notification, li, false);
-        //notification = getUserRelationship(notification);
+        notification = getSenderName(notification);
+        notification = classifyUserActivities(notification, li, false);
     }
-
     else{ //Page and System
         var IsPage = false;
-        liked_pagename.forEach(function(name){
-            if(noti_title.search(name) != -1){
-                IsPage = true;
-                notification['Sender'] = 'Page';
-                notification['Relationship'] = 'LikedPage';
-                //notification = classifyPageAcitivites(notification);
+        if(relationship.search("page") != -1 && relationship.search("subscription") == -1){ //Page
+            IsPage = true;
+            notification = classifyPageAcitivites(notification, li);
+            //My page와 liked page 구별
+        }
+        else{ //Not Page
+            if(noti_title.search('님이') != -1){ //User
+                notification['Sender'] = 'User';
+                notification = getSenderName(notification);
+                notification = classifyUserActivities(notification, li, false);
             }
-        });
-        my_pagename.forEach(function(name){
-            if(noti_title.search(name) != -1){
-                IsPage = true;
-                notification['Sender'] = 'Page';
-                notification['Relationship'] = 'MyPage';
-                //notification = classifyPageAcitivites(notification);
+            else{ //System
+                notification['Sender'] = 'System';
+                notification = classifySystemAcitivies(notification);
             }
-        });
-        if(!IsPage){
-            notification['Sender'] = 'System';
-            //notification = classifySystemAcitivies(notification);
         }
     }
     notifications.push(notification);
 });
 
+function downloadObjectAsJson(exportObj, exportName){
+    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+    var downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href",     dataStr);
+    downloadAnchorNode.setAttribute("download", exportName + ".json");
+    document.body.appendChild(downloadAnchorNode); // required for firefox
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  }
 
-// //get group factors (public / closed)
-// var g_factor = document.querySelector('div._19s_'); //-> 이거 ajax에서 받아오는 걸로 바꿔야함
-// g_factor = $(g_factor).text(); //'비공개 그룹'
-// g_factor.replace(/ .*/,''); // '비공개' from '비공개 그룹'
-// var Ispublic;
-// if(g_factor == '비공개') Ispublic = false;
-// else if(g_factor == '공개') Ispublic = true;
+  downloadObjectAsJson(notifications, "notifications1");
+
+// var comment_re = /댓글 ((,|\d)*)개/; 
+// var comment_res = comment_re.exec(text);
+// var comment_cnt;
+// if(comment_res == null) comment_cnt = 0;
+// else comment_cnt = +comment_res[1].replace(/,/g,'');
+// list["Comment"] = comment_cnt;
+
+// var share_re = /공유 ((,|\d)*)회/; 
+// var share_res = share_re.exec(text);
+// var share_cnt;
+// if(share_res == null) share_cnt = 0;
+// else share_cnt = +share_res[1].replace(/,/g,'');
+// list["Share"] = share_cnt;
 
