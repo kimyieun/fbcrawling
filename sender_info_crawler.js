@@ -24,7 +24,7 @@ function getFriendsInfo(friend){
     if(friendname in senderlist){
         //relationship
         var relationship = $(friend).find('u').text();
-        if(relationship != null) senderlist[friendname].push(relationship);
+        if(relationship != "") senderlist[friendname].push(relationship);
         else senderlist[friendname].push("친구");
         //mutual_friend_cnt
         var re = /친구 ((,|\d)*)명/;
@@ -51,15 +51,13 @@ var myvar = setInterval(function() {
         getFriendsInfo(friends[i++]);
 }, 500);
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 notifications.forEach(function(noti){
     if(noti['Sender'] == 'User'){
         var noti_name = (typeof(noti['SenderName']) != "string")? noti['SenderName'][0] : noti['SenderName'];
         if(senderlist[noti_name] == []) noti['Relationship'] = ["Other"];
-        else{
-            noti['Relationship'] = [senderlist[noti_name][0]];
-            noti['Relationship'].push(senderlist[noti_name][1]);
-        }
+        else noti['Relationship'] = [senderlist[noti_name][0], senderlist[noti_name][1]];
     }
 });
 
@@ -73,7 +71,7 @@ function downloadObjectAsJson(exportObj, exportName){
     downloadAnchorNode.remove();
   }
 
-  downloadObjectAsJson(notifications, "notifications+User");
+  downloadObjectAsJson(notifications, "준회_" + "notifications+User");
 /*
 2. get joined groups name (favorite / not)
 https://www.facebook.com/groups/
@@ -112,7 +110,7 @@ function downloadObjectAsJson(exportObj, exportName){
     downloadAnchorNode.remove();
   }
 
-  downloadObjectAsJson(notifications, "notifications+Group");
+  downloadObjectAsJson(notifications, "준회_" + "notifications+Group");
 
 
 // /*
