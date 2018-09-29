@@ -135,7 +135,8 @@ for noti in notifications:
     else:
         featurevector.append(0) 
     vectorSet.append(featurevector)
-with open('feature_vector.json', 'w') as outfile:
+
+with open('./Features/feature_vector.json', 'w') as outfile:
     json.dump(vectorSet, outfile)
 
 
