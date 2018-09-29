@@ -199,7 +199,7 @@ function classifyUserActivities(list, li) {
     if (title.search('언급했습니다') != -1 || title.search('태그했습니다') != -1) { //tag
         list["Activity"] = 'Tag';
         list = getContentInfo(list, li);   
-        list = getContentOwver(list);
+        list = getContentOwner(list);
     }
     else if (title.search('생일') != -1) { //birthday
         list["Activity"] = 'Birthday';
@@ -218,12 +218,12 @@ function classifyUserActivities(list, li) {
     }
     else if (title.search('댓글을 남겼습니다') != -1 || title.search('답글을 남겼습니다') != -1) { //Comment
         list["Activity"] = 'Comment';
-        list = getContentOwver(list);
+        list = getContentOwner(list);
     }
     else if (title.search('공유') != -1) { //share
         list["Activity"] = 'Share';
         list = getContentInfo(list, li);
-        list = getContentOwver(list);
+        list = getContentOwner(list);
     }
     /*
     else if (title.search('추억') != -1) {
@@ -237,12 +237,12 @@ function classifyUserActivities(list, li) {
     else if (title.search('좋아합니다') != -1 || title.search('공감했습니다') != -1) { //like
         list["Activity"] = 'Like';
         list = getContentInfo(list, li);
-        list = getContentOwver(list);
+        list = getContentOwner(list);
     }
     else if (title.search('올렸습니다') != -1 || title.search('추가') != -1 || title.search('게시') != -1 || title.search('에 있습니다|에 있었습니다') != -1) { //post text
         list["Activity"] = 'Post';
         list = getContentInfo(list, li);
-        list = getContentOwver(list);
+        list = getContentOwner(list);
     }
     else if (title.search('커버 사진') != -1 || title.search('프로필 사진') != -1) {
         list["Activity"] = 'AddorChangeProfile';
@@ -396,11 +396,10 @@ lis.forEach(function (li) {
     }
 });
 
-//페이지 이름 먼저 받기
 
 /*
 
-function downloadObjectAsJson(exportObj, exportName){
+  function downloadObjectAsJson(exportObj, exportName){
     var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
     var downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute("href",     dataStr);
@@ -409,12 +408,13 @@ function downloadObjectAsJson(exportObj, exportName){
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
   }
-
-  downloadObjectAsJson(notifications, "준회_" + "notifications");
+  downloadObjectAsJson(notifications, "이은_" + "notifications");
 
 */
 
 /*
+// 사용자가 notification interestingness 평가하기 위해서 notification title 받아오는 기능
+
 notititles = [];
 notifications.forEach(function(d){
     return notititles.push(d['Title']);

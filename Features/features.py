@@ -2,7 +2,7 @@ import json
 from pprint import pprint
 
 try:
-    with open( "./Features/data.json", encoding='UTF8' ) as f :
+    with open( "./Features/이은_data.json", encoding='UTF8' ) as f :
         notifications = json.load(f)
         
 except EnvironmentError: # parent of IOError, OSError *and* WindowsError where available
@@ -105,19 +105,21 @@ for noti in notifications:
 
     if "Relationship" in noti: #Relationship
         if noti["Relationship"] == "MyPage":
-            featurevector += [0, 0, 0, 1, 0]
+            featurevector += [0, 0, 0, 0, 1, 0]
         elif noti["Relationship"] == "LikedPage":
-            featurevector += [0, 0, 0, 0, 1]
+            featurevector += [0, 0, 0, 0, 0, 1]
         elif len(noti["Relationship"]) > 0 and noti["Relationship"][0] == "친구":
-            featurevector += [1, 0, 0, 0, 0]
+            featurevector += [1, 0, 0, 0, 0, 0]
         elif len(noti["Relationship"]) > 0 and noti["Relationship"][0] == "친한친구":
-            featurevector += [0, 1, 0, 0, 0]
+            featurevector += [0, 1, 0, 0, 0, 0]
+        elif len(noti["Relationship"]) > 0 and noti["Relationship"][0] == "Other":
+            featurevector += [0, 0, 1, 0, 0, 0]
         elif len(noti["Relationship"]) > 1 and noti["Relationship"][1] == "Joined":
-            featurevector += [0, 0, 1, 0, 0]
+            featurevector += [0, 0, 0, 1, 0, 0]
         else:
-            featurevector += [0, 0, 0, 0, 0]
+            featurevector += [0, 0, 0, 0, 0, 0]
     else:
-        featurevector += [0, 0, 0, 0, 0]
+        featurevector += [0, 0, 0, 0, 0, 0]
     
     if "Relationship" in noti: #Mutual friends
         if len(noti["Relationship"]) > 1 and (noti["Relationship"][0] == "친구" or noti["Relationship"][0] == "친한친구"):
@@ -134,9 +136,18 @@ for noti in notifications:
             featurevector.append(1)
     else:
         featurevector.append(0) 
+
+    if "ContainUser" in noti:
+        if noti["ContainUser"] == "0":
+            featurevector.append(0)
+        else:
+            featurevector.append(1)
+    else:
+        featurevector.append(0)
+
     vectorSet.append(featurevector)
 
-with open('./Features/feature_vector.json', 'w') as outfile:
+with open('./Features/이은_feature_vector.json', 'w') as outfile:
     json.dump(vectorSet, outfile)
 
 
