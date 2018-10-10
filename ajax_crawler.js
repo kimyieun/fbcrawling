@@ -39,9 +39,9 @@ function getSenderName(list) {
     if (list['Sender'] == 'User') {
         var re = /(.*)(님의|님이|님 외|님과|님도)/;
         var res = re.exec(title)[1];
-        res = res.replace('오늘은 ', '').replace('과거의 오늘 ', '').split('님과|님도');
-        if (typeof (res) == "object" && res[0].search('님이|,|님도') != -1) {
-            re = /(.*?)(님이|,|님도|님과)/;
+        res = res.replace('오늘은 ', '').replace('과거의 오늘 ', '').split('님,|님과|님도');
+        if (typeof (res) == "object" && res[0].search('님,|님이|,|님도|님과') != -1) {
+            re = /(.*?)(님,|님이|,|님도|님과)/;
             res = re.exec(res[0])[1];
         }
     }
@@ -201,6 +201,9 @@ function classifyUserActivities(list, li) {
         list = getContentInfo(list, li);   
         list = getContentOwner(list);
     }
+    else if(title.search('안전하다고') != -1){
+        list["Activity"] = 'crisis_status';
+    }
     else if (title.search('생일') != -1) { //birthday
         list["Activity"] = 'Birthday';
     }
@@ -213,7 +216,7 @@ function classifyUserActivities(list, li) {
     else if (title.search('페이지') != -1 && title.search('좋아요를 요청') != -1) { //
         list["Activity"] = 'RequestlikeforPage';
     }
-    else if (title.search('이벤트') != -1 && title.search('응답') != -1) { //join the event
+    else if (title.search('이벤트') != -1 && title.search('근처') != -1) { //join the event
         list["Activity"] = 'JoinEvent';
     }
     else if (title.search('댓글을 남겼습니다') != -1 || title.search('답글을 남겼습니다') != -1) { //Comment
@@ -250,7 +253,7 @@ function classifyUserActivities(list, li) {
     }
     else if(title.search('이벤트에 초대') != -1){
         list["Activity"] = 'InviteEvent';
-        list = getContentInfo(list, li); 
+        //list = getContentInfo(list, li); 
     }
     else if(title.search('소통') != -1){
         list["Activity"] = 'MessageRequest';
@@ -284,7 +287,7 @@ function classifyPageAcitivites(list, li, relationship) {
         list['Relationship'] = 'LikedPage';
     }
     else if ((title.search('알 수 있도록') != -1 && title.search('좋아요를 요청') != -1) ||
-        (title.search('늘릴 수 있도록') != -1 && title.search('추가하세요') != -1)) { //recommended action for my pages 
+        (title.search('늘릴 수 있도록') != -1 && title.search('추가하세요') != -1) || list["notiType"] == "aymt_upsell_tip") { //recommended action for my pages 
         list["Activity"] = 'RecommendationforMypage';
         list['Relationship'] = 'MyPage';
     }
@@ -308,13 +311,16 @@ function classifyPageAcitivites(list, li, relationship) {
     return list;
 }
 
-function classifySystemAcitivies(list) {
+function classifySystemAcitivies(list, relationship) {
     var title = list['Title'];
     if (title.search('친구 추천') != -1) { //recommendation friends 
         list["Activity"] = 'RecommendFriend';
     }
     else if (title.search('동영상') != -1 && title.search('확인') != -1) { // recommendation video
         list["Activity"] = 'RecommendVideo';
+    }
+    else if(relationship.search("event_weekly_digest") != -1){
+        list["Activity"] = 'RecommendEvent';
     }
     else if (title.search('지역 페이지') != -1 && title.search('새로운 소식') != -1) { //recommendation local pages
         list["Activity"] = 'RecommendLocalpage';
@@ -365,7 +371,7 @@ lis.forEach(function (li) {
             notification = classifyGroupActivities(notification, li);
             notification = getGroupAttr(notification, li);
         }
-        else if (((noti_title.search('님 외') != -1 && noti_title.search('명이') != -1) || noti_title.search('생일') != -1) && relationship.search('page') == -1) { //User
+        else if (((noti_title.search('님 외') != -1 && noti_title.search('명이|명도') != -1) || noti_title.search('생일') != -1) && relationship.search('page') == -1) { //User
             notification['Sender'] = 'User';
             notification = getSenderName(notification);
             notification = classifyUserActivities(notification, li);
@@ -386,7 +392,7 @@ lis.forEach(function (li) {
                 }
                 else { //System
                     notification['Sender'] = 'System';
-                    notification = classifySystemAcitivies(notification);
+                    notification = classifySystemAcitivies(notification, relationship);
                 }
             }
         }
@@ -395,22 +401,6 @@ lis.forEach(function (li) {
         console.log(e);
     }
 });
-
-
-/*
-
-  function downloadObjectAsJson(exportObj, exportName){
-    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
-    var downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href",     dataStr);
-    downloadAnchorNode.setAttribute("download", exportName + ".json");
-    document.body.appendChild(downloadAnchorNode); // required for firefox
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
-  }
-  downloadObjectAsJson(notifications, "이은_" + "notifications");
-
-*/
 
 /*
 // 사용자가 notification interestingness 평가하기 위해서 notification title 받아오는 기능
@@ -428,9 +418,24 @@ notititles.forEach(function(title){
 var encodedUri = encodeURI(csvContent);
 var link = document.createElement("a");
 link.setAttribute("href", encodedUri);
-link.setAttribute("download", "A_" + "noti_titles.txt");
+link.setAttribute("download", "9_" + "noti_titles.txt");
 link.innerHTML= "Click Here to download";
 document.body.appendChild(link); // Required for FF
 
 link.click();
+*/
+
+/*
+
+  function downloadObjectAsJson(exportObj, exportName){
+    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+    var downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href",     dataStr);
+    downloadAnchorNode.setAttribute("download", exportName + ".json");
+    document.body.appendChild(downloadAnchorNode); // required for firefox
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  }
+  downloadObjectAsJson(notifications, "9_" + "notifications");
+
 */
