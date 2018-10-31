@@ -1,9 +1,9 @@
 import json
 from pprint import pprint
 
-for i in range(1, 24):  
+for i in range(0, 1):  
     try:
-        with open( "./Features/" + str(i) + "_data.json", encoding='UTF8' ) as f :
+        with open( "./Interface/UserStudy/NotiData/" + str(i) + "_data.json", encoding='UTF8' ) as f :
             notifications = json.load(f)
             
     except EnvironmentError: # parent of IOError, OSError *and* WindowsError where available
@@ -202,7 +202,7 @@ for i in range(1, 24):
 
         vectorSet.append(featurevector)
 
-    with open('./Features/' + str(i) + '_feature_vector_test.json', 'w') as outfile:
+    with open('./Interface/UserStudy/NotiData/' + str(i) + '_feature_vector.json', 'w') as outfile:
         json.dump(vectorSet, outfile)
 
 

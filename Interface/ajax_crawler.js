@@ -396,7 +396,7 @@ lis.forEach(function (li) {
                 }
             }
         }
-        notifications.push(notification);
+        if(notification['Activity'] != null) notifications.push(notification);
     } catch (e) {
         console.log(e);
     }
