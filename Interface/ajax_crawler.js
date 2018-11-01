@@ -360,6 +360,7 @@ lis.forEach(function (li) {
         var noti_title = $(li).find('div._4l_v').find('span').eq(0).text();
         var notification = {};
         notification["Title"] = noti_title;
+        notification["HTML"] = li.outerHTML;
         //notification metadata
         notification = getNotiMetadata(notification, li);
         //notification activity and content classification

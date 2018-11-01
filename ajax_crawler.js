@@ -359,7 +359,7 @@ lis.forEach(function (li) {
     try {
         var noti_title = $(li).find('div._4l_v').find('span').eq(0).text();
         var notification = {};
-        notification["Title"] = noti_title;
+        notification["Title"] = noti_title;notification["HTML"]
         //notification metadata
         notification = getNotiMetadata(notification, li);
         //notification activity and content classification
@@ -380,8 +380,9 @@ lis.forEach(function (li) {
             var IsPage = false;
             if ((relationship.search("page") != -1 && relationship.search("subscription") == -1) || relationship.search("event_calendar_create") != -1) { //Page
                 IsPage = true;
-                notification['Sender'] = 'Page';
-                notification = classifyPageAcitivites(notification, li, relationship);
+                notification['Acitivity'] = null;
+                //notification['Sender'] = 'Page';
+                //notification = classifyPageAcitivites(notification, li, relationship);
                 //My page와 liked page 구별
             }
             else { //Not Page

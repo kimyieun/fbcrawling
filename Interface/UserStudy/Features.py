@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 import json
 from pprint import pprint
 
@@ -8,7 +9,7 @@ for i in range(0, 1):
             
     except EnvironmentError: # parent of IOError, OSError *and* WindowsError where available
         print('NoFile')
-
+    
     def TimeInterval(x):
         return {
             1 : [1, 0, 0, 0, 0],
@@ -201,8 +202,9 @@ for i in range(0, 1):
         '''
 
         vectorSet.append(featurevector)
+        noti["Feature"] = featurevector
 
-    with open('./Interface/UserStudy/NotiData/' + str(i) + '_feature_vector.json', 'w') as outfile:
-        json.dump(vectorSet, outfile)
+    with open( "./Interface/UserStudy/NotiData/" + str(i) + "_data.json", 'w', encoding="UTF-8") as outfile :
+        json.dump(notifications, outfile, ensure_ascii=False)
 
 

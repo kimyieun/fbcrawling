@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    </head>
+    <body>
+        <div id="u_0_y">
+            <div class="_44_u">
+                <ul class="list">
+                    {% for item in options %}
+                        {{item["HTML"]|safe}}
+                        <!--{{item["Score"]}}-->
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </body>
+</html>
