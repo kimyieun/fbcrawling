@@ -1,0 +1,167 @@
+div {
+    display : block;
+}
+
+body {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 12px;
+}
+
+a {
+    cursor : pointer;
+    text-decoration: none;
+}
+
+._44_u {
+    min-width : 400px;
+    overflow : hidden;
+    position : relative;
+}
+ul._55mc {
+    display : none;
+}
+
+ul {
+    list-style-type : none;
+    margin : 0;
+    padding : 0;
+    display : block;
+}
+
+.wrapper {
+    position: relative;
+}
+
+.form-check-input {
+    transform: scale(2);
+}
+
+.form-control {
+    visibility : hidden;
+}
+.action {
+    position: absolute;
+    right:0;
+    top:0;
+    margin-right: 40px;
+    margin-top:10px;
+}
+
+.jewelItemNew ._33e{
+    background-color : #edf2fa;
+}
+
+._33c {
+    background-color : #fff;
+    border-bottom: 1px solid #dddfe2;
+    overflow: hidden;
+    position: relative;
+    padding-right : 200px;
+}
+
+._33e {
+    color: #1d2129;
+    display: block;
+    padding: 6px 30px 5px 12px;
+    position: relative;
+}
+
+._1_0e {
+    padding-right: 30px;
+}
+
+li {
+    display: list-item;
+    text-align: -webkit-match-parent;
+}
+
+._ohe {
+    float : left;
+}
+
+._2qgu._2qgu {
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+._62bi {
+    display: block;
+    height: 32px;
+    margin-right: 12px;
+    width: 32px;
+}
+
+img {
+    border: 0;
+}
+
+._42ef {
+    overflow: hidden;
+}
+
+.clearfix {
+    zoom: 1;
+}
+
+._ohf {
+    float: right;
+}
+
+._4l_v {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-top: -1px;
+    word-wrap: break-word;
+    min-height: 34px;
+}
+
+._4l_v>span {
+    display: block;
+    max-height: none;
+}
+
+.fwb {
+    font-weight: 600;
+}
+
+._8r {
+    margin-right: 5px;
+}
+._8o, ._8o .img {
+    display: block;
+}
+._10cu {
+    height: 16px;
+    width: 16px;
+}
+
+._6t8b {
+    display: flex;
+}
+
+._33g {
+    /*color: #90949c;*/
+    color : transparent;
+}
+abbr {
+    border-bottom: none;
+    text-decoration: none;
+}
+
+#u_0_y {
+    margin-bottom: 50px;
+}
+
+
+.footer {
+    width: 100%;
+    text-align:center;
+    margin-bottom: 10px;
+    position: fixed;
+    bottom:0;
+}
+
+.footer button {
+    width: 200px;
+}

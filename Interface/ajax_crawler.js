@@ -352,11 +352,12 @@ function getGroupAttr(notification, li) {
 
 var lis = document.querySelectorAll('ul[data-testid="see_all_list"] > li');
 var notifications = [];
-var noti_num = 0;
+var noti_num = 0;  
 
 
 lis.forEach(function (li) {
     try {
+        if(noti_num == 50) return false;
         var noti_title = $(li).find('div._4l_v').find('span').eq(0).text();
         var notification = {};
         notification["Title"] = noti_title;
@@ -397,34 +398,14 @@ lis.forEach(function (li) {
                 }
             }
         }
-        if(notification['Activity'] != null) notifications.push(notification);
+        if(notification['Activity'] != null && notification["IsRead"] == false){
+            notifications.push(notification);
+            noti_num++;
+        }
     } catch (e) {
         console.log(e);
     }
 });
-
-/*
-// 사용자가 notification interestingness 평가하기 위해서 notification title 받아오는 기능
-
-notititles = [];
-notifications.forEach(function(d){
-    return notititles.push(d['Title']);
-});
-
-var csvContent = "data:text/csv;charset=utf-8,";
-notititles.forEach(function(title){
-   csvContent += title + "\r\n";
-}); 
-
-var encodedUri = encodeURI(csvContent);
-var link = document.createElement("a");
-link.setAttribute("href", encodedUri);
-link.setAttribute("download", "23_" + "noti_titles.txt");
-link.innerHTML= "Click Here to download";
-document.body.appendChild(link); // Required for FF
-
-link.click();
-*/
 
 /*
 
@@ -437,7 +418,7 @@ link.click();
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
   }
-  downloadObjectAsJson(notifications, "23_" + "notifications");
+  downloadObjectAsJson(notifications, "1_" + "notifications");
 
 */
 
@@ -456,7 +437,7 @@ notisenders.forEach(function(Sender){
 var encodedUri = encodeURI(csvContent);
 var link = document.createElement("a");
 link.setAttribute("href", encodedUri);
-link.setAttribute("download", "23_" + "noti_Sender.txt");
+link.setAttribute("download", "1_" + "noti_Sender.txt");
 link.innerHTML= "Click Here to download";
 document.body.appendChild(link); // Required for FF
 

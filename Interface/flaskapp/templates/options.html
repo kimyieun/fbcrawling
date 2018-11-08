@@ -1,18 +1,52 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    </head>
-    <body>
-        <div id="u_0_y">
-            <div class="_44_u">
-                <ul class="list">
-                    {% for item in options %}
+
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+
+<body>
+    <div id="u_0_y">
+        <div class="_44_u">
+            <ul class="list">
+                {% for item in options %}
+                <li class="wrapper">
+                    <ul>
                         {{item["HTML"]|safe}}
-                        <!--{{item["Score"]}}-->
-                    {% endfor %}
-                </ul>
-            </div>
+                    </ul>
+                    <!--{{item["Score"]}}-->
+                    <div class="action">
+                        <input class="form-check-input" type="checkbox" name="check" id={{loop.index|safe}}>
+                        <input class="form-control" type="number" name="quantity" min="1" max="5" placeholder="Score" id={{loop.index|safe}}>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
         </div>
-    </body>
+    </div>
+    <div class="footer">
+        <button id="record" class="btn btn-primary">제출하기</button>
+    </div>
+    <script>
+        $(function(){
+            let start = +new Date();
+            $('a._33e').attr('target', '_blank')
+            $('.form-check-input').change(function(){
+                if(this.checked){
+                    let num = this.id;
+                    $('#' + num + '.form-control').css('visibility', 'visible');
+                }
+            })
+            $('#record').click(function(){
+                let end = +new Date();
+                let diffsec = parseInt((end - start) / 1000);
+                console.log("start : " + start + " end : " + end + " diff : " + diffsec);
+            });
+        })
+    </script>
+</body>
+
 </html>
