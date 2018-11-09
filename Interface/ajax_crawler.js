@@ -398,7 +398,7 @@ lis.forEach(function (li) {
                 }
             }
         }
-        if(notification['Activity'] != null && notification["IsRead"] == false){
+        if(notification['Activity'] != null && notification['Sender'] != 'Page' && notification["IsRead"] == false){
             notifications.push(notification);
             noti_num++;
         }

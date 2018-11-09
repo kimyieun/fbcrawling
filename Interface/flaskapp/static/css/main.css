@@ -39,6 +39,16 @@ ul {
 .form-control {
     visibility : hidden;
 }
+
+.order{
+    position: absolute;
+    right: 0;
+    top: 0;
+    margin-right: 170px;
+    margin-top: 10px;
+    font-size : large;
+}
+
 .action {
     position: absolute;
     right:0;

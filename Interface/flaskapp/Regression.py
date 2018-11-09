@@ -43,18 +43,19 @@ kf = KFold(n_splits = 5, shuffle = True)
 
 # In[350]:
 
-
 class Net(torch.nn.Module):
-    def __init__(self, n_feature, n_hidden, n_output):
+    def __init__(self, layer_list, n_output):
         super(Net, self).__init__()
-        self.hidden = torch.nn.Linear(n_feature, n_hidden)   # hidden layer
-        self.hidden2 = torch.nn.Linear(n_hidden, 10)   # hidden layer
-        #self.hidden3 = torch.nn.Linear(n_hidden, n_hidden)   # hidden layer
-        self.predict = torch.nn.Linear(10, n_output)   # output layer
+        self.hidden_list = torch.nn.ModuleList([])
+        for idx, value in enumerate(layer_list):
+            if idx == len(layer_list) - 1:
+                break
+            else:
+                self.hidden_list.append(torch.nn.Linear(value, layer_list[idx + 1]))
+        self.predict = torch.nn.Linear(layer_list[len(layer_list) - 1], n_output) #output layer
 
     def forward(self, x):
-        x = F.relu(self.hidden(x))      # activation function for hidden layer
-        x = F.relu(self.hidden2(x))      # activation function for hidden layer
-        #x = F.relu(self.hidden3(x))      # activation function for hidden layer
+        for idx, value in enumerate(self.hidden_list):
+            x = F.relu(self.hidden_list[idx](x))
         x = self.predict(x)             # linear output
         return x

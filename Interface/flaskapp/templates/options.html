@@ -18,6 +18,7 @@
                         {{item["HTML"]|safe}}
                     </ul>
                     <!--{{item["Score"]}}-->
+                    <div class="order">{{loop.index|safe}}</div>
                     <div class="action">
                         <input class="form-check-input" type="checkbox" name="check" id={{loop.index|safe}}>
                         <input class="form-control" type="number" name="quantity" min="1" max="5" placeholder="Score" id={{loop.index|safe}}>
@@ -35,15 +36,14 @@
             let start = +new Date();
             $('a._33e').attr('target', '_blank')
             $('.form-check-input').change(function(){
-                if(this.checked){
-                    let num = this.id;
-                    $('#' + num + '.form-control').css('visibility', 'visible');
-                }
+                let num = this.id;
+                $('#' + num + '.form-control').css('visibility', this.checked ? 'visible' : 'hidden');
             })
             $('#record').click(function(){
+                if(!confirm('제출하시겠습니까?')) return;
                 let end = +new Date();
                 let diffsec = parseInt((end - start) / 1000);
-                console.log("start : " + start + " end : " + end + " diff : " + diffsec);
+                $('#record').attr('disabled', true);
             });
         })
     </script>

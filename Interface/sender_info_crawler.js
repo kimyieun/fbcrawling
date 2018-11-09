@@ -71,7 +71,7 @@ function downloadObjectAsJson(exportObj, exportName){
     downloadAnchorNode.remove();
   }
 
-  downloadObjectAsJson(notifications, "23_" + "notifications+User");
+  downloadObjectAsJson(notifications, "0_" + "notifications+User");
 /*
 2. get joined groups name (favorite / not)
 https://www.facebook.com/groups/
@@ -110,7 +110,7 @@ function downloadObjectAsJson(exportObj, exportName){
     downloadAnchorNode.remove();
   }
 
-  downloadObjectAsJson(notifications, "23_" + "data");
+  downloadObjectAsJson(notifications, "0_" + "data");
 
 
 // /*

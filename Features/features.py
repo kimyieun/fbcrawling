@@ -110,12 +110,12 @@ for i in range(1, 24):
             featurevector += Sender(noti["Sender"])
         else:
             featurevector += [0, 0, 0]
-        '''
+        
         if "Activity" in noti:
             featurevector += Activity(noti["Activity"])
         else:
             featurevector += [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        '''
+        
         '''
         if "Likes" in noti:
             featurevector.append(noti["Likes"])
@@ -185,7 +185,7 @@ for i in range(1, 24):
                 featurevector.append(1)
         else:
             featurevector.append(0)
-
+    
         if "Closeness_score" in noti:
             if noti["Closeness_score"] == "0":
                 featurevector.append(0)
